@@ -52,27 +52,38 @@ def crear_kb() -> KnowledgeBase:
     kb.add_fact(Predicate("da_coartada",(elena, victor)))
     
     #REGLAAS
+    #Quien fue grabado en cámara en un lugar alejado de la escena durante el crimen está descartado.
     kb.add_rule(Rule(
         head=Predicate("descartado",(X,)),
         body=(Predicate("grabado_por_camara",(X, Y)), Predicate("alejado",(Y,)))
     ))
-    
+    #La víctima del crimen no tiene razón para mentir; es testigo imparcial.
     kb.add_rule(Rule(
         head=Predicate("testigo_imparcial",(X,)),
         body=(Predicate("es_victima",(X)),)
     ))
-    
+    #La acusación de un testigo imparcial es creíble.
     kb.add_rule(Rule(
         head=Predicate("acusación_creible",(X,Y)),
         body=(Predicate("testigo_imparcial",(X,)), Predicate("acusa", (X,Y)))
     ))
-    
+    #Quien estaba en la escena y es acusado de forma creíble es culpable.
     kb.add_rule(Rule(
         head=Predicate("culpable", (X,)),
         body=(Predicate("en_escena",(X,)), Predicate("acusación_creible", (Y,X)))
     ))
     
+    #Quien da coartada a un culpable lo está defendiendo.
+    kb.add_rule(Rule(
+        head=Predicate("defiende_al_culpable", (X,)),
+        body=(Predicate("da_coartada", (X, Y)), Predicate("culpable", (Y,)))
+    ))
     
+    #  Coartadas mutuas
+    kb.add_rule(Rule(
+        head=Predicate("alianza_coartadas", (X, Y)),
+        body=(Predicate("da_coartada", (X, Y)), Predicate("da_coartada", (Y, X)))
+    ))
     # === END YOUR CODE ===
 
     return kb
