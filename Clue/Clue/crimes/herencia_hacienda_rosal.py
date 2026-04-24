@@ -40,7 +40,29 @@ def crear_kb() -> KnowledgeBase:
     vaso_adulterado   = Term("vaso_adulterado")
 
     # === YOUR CODE HERE ===
+    X = Term("$X")
+    Y = Term("$Y")
+    
+    # coartada con cámara -> objetiva
+    kb.add_fact(Predicate("coartada_objetiva", (enfermera_campos,)))
 
+    kb.add_fact(Predicate("hereda_actualmente", (abogado_restrepo,)))
+    kb.add_fact(Predicate("perderia_herencia", (abogado_restrepo,)))    
+    kb.add_fact(Predicate("hereda_actualmente", (sobrino_esteban,)))
+    kb.add_fact(Predicate("perderia_herencia", (sobrino_esteban,)))
+    
+    # evidencias físicas
+    kb.add_fact(Predicate("objeto_crimen", (vaso_adulterado,)))
+    kb.add_fact(Predicate("huellas_en_objeto", (sobrino_esteban, vaso_adulterado)))
+    
+    kb.add_fact(Predicate("acusa", (sobrino_esteban, secretaria_luna)))
+    kb.add_fact(Predicate("acusa", (abogado_restrepo, sobrino_esteban)))
+    kb.add_fact(Predicate("da_coartada", (secretaria_luna, sobrino_esteban)))
+    
+    # No fue grabado -> no tiene coartada
+    kb.add_fact(Predicate("sin_coartada", (abogado_restrepo,)))
+    kb.add_fact(Predicate("sin_coartada", (sobrino_esteban,)))
+    kb.add_fact(Predicate("sin_coartada", (secretaria_luna,)))
     # === END YOUR CODE ===
 
     return kb
