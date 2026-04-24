@@ -62,22 +62,22 @@ def crear_kb() -> KnowledgeBase:
     
     kb.add_rule(Rule(
         head=Predicate("coartada_verificada", (X,)),
-        body=(Predicate("dcumentación_vaje", (X,)),)
+        body=(Predicate("documentación_viaje", (X,)),)
     ))
     
-    kb.add_rule(Rule(
-        head=Predicate("descartado", (X,)),
-        body=(Predicate("registro_conferencia", (X,)),)
+    kb.add_fact(Rule(
+        head=Predicate("coartada_verificada", (X,)),
+        body=(Predicate("registro_conferencia", (X,)))
     ))
     #
     kb.add_rule(Rule(
         head=Predicate("descartado", (X,)),
-        body=(Predicate("coartada_verificada", (X)),)
+        body=(Predicate("coartada_verificada", (X,)),)
     ))
     
     kb.add_rule(Rule(
         head=Predicate("conflicto_interes", (X,Y)),
-        body=(Predicate("recibió_pago", (X,Y)),Predicate("es_empresa_rival", (Y)))
+        body=(Predicate("recibió_pago", (X,Y)),Predicate("es_empresa_rival", (Y,)))
     ))
 
     kb.add_rule(Rule(
@@ -92,7 +92,7 @@ def crear_kb() -> KnowledgeBase:
     
     kb.add_rule(Rule(
         head=Predicate("culpable", (X,)),
-        body=(Predicate("motivo_sabotaje",(X,)),Predicate("accedio_sala", (X,sala_cultivos)),
+        body=(Predicate("motivo_sabotaje",(X,)),Predicate("estuvo_crimen", (X,)),
               Predicate("sin_coartada", (X,)))
     ))
     # === END YOUR CODE ===
