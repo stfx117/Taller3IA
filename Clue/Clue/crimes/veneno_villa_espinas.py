@@ -36,7 +36,54 @@ def crear_kb() -> KnowledgeBase:
     frasco_arsenico = Term("frasco_arsenico")
 
     # === YOUR CODE HERE ===
-
+    #Varialbes
+    X = Term("$X")
+    Y = Term("$Y")
+    W = Term("$W")
+    
+    kb.add_fact(Predicate("arma_crime", (frasco_arsenico)))
+    kb.add_fact(Predicate("huellas", (reynaldo,frasco_arsenico)))
+    kb.add_fact(Predicate("lejos_escena", (pablo,)))
+    kb.add_fact(Predicate("lejos_escena",(bernardo,)))
+    kb.add_fact(Predicate("acusa", (pablo, reynaldo)))
+    kb.add_fact(Predicate("da_coartada", (margot, reynaldo)))
+    kb.add_fact(Predicate("da_coartada", (reynaldo, margot)))
+    
+    kb.add_fact(Predicate("sin_coartada_verificada",(reynaldo,)))
+    #Quien tiene huellas en el arma del crimen tiene evidencia directa en su contra.
+    kb.add_rule(Rule(
+        head=Predicate("evidencia_directa", (X,)),
+        body=(Predicate("huellas", (X,W), Predicate("arma_crime", (W,))))
+    ))
+    
+    #Quien estuvo lejos de la escena durante el crimen está descartado como culpable.
+    kb.add_rule(Rule(
+        head=Predicate("descartado", (X,)),
+        body=Predicate("lejos_escena", (X))
+    ))
+    
+    #El testimonio de alguien descartado como culpable es confiable
+    kb.add_rule(Rule(
+        head=Predicate("testimonio_confiable",(X,Y)),
+        body=(Predicate("descartado",(X,)), Predicate("acusa",(X,Y)))
+    ))
+    #Culpable por evidencia directa y no tener coartada verificada
+    kb.add_rule(Rule(
+        head=Predicate("culpable", (X,)),
+        body=(Predicate("evidencia_directa", (X,)), Predicate("sin_coartada_verificada", (X,)))
+    ))
+    
+    # Coartada
+    kb.add_rule(Rule(
+        head=Predicate("encubridor", (X,)),
+        body=(Predicate("da_coartada", (X, Y)), Predicate("culpable", (Y,)))
+    ))
+    
+    # Coartada Cruzada
+    kb.add_rule(Rule(
+        head=Predicate("coartada_cruzada", (X, Y)),
+        body=(Predicate("da_coartada", (X, Y)), Predicate("da_coartada", (Y, X)))
+    ))
     # === END YOUR CODE ===
 
     return kb
