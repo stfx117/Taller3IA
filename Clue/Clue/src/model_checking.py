@@ -8,7 +8,7 @@ Hint: Usa las funciones get_atoms() y evaluate() de logic_core.py.
 
 from __future__ import annotations
 
-from src.logic_core import Formula
+from src.logic_core import Formula, Atom, Not, And, Or, Implies, Iff, evaluate
 
 
 
@@ -32,16 +32,15 @@ def get_all_models(atoms: set[str]) -> list[dict[str, bool]]:
           Cada bit corresponde al valor de verdad de un atomo.
     """
     # === YOUR CODE HERE ===
-    atomsList= sorted(atoms) #organizar atoms en una lista ordenada
-    models=[] #lista de retorno
-    
-    #añadir todos los casos posibles por medio de dict
-    for i in atomsList:
-        dict1={i: True}     #dos valores posibles
-        dict2={i: False}
-        models.append(dict1)        #añadirlos a la lista de modelos
-        models.append(dict2)
-    
+    atoms_list = sorted(atoms)
+    n = len(atoms_list)
+    models = []
+    for i in range(2 ** n):          # de 0 a 2^n - 1
+        model = {}
+        for j, atom in enumerate(atoms_list):
+            # el bit j del número i da el valor de verdad del átomo j
+            model[atom] = bool((i >> (n - 1 - j)) & 1)
+        models.append(model)
     return models
     
     # === END YOUR CODE ===
@@ -66,7 +65,7 @@ def check_satisfiable(formula: Formula) -> tuple[bool, dict[str, bool] | None]:
           la formula en cada uno usando evaluate().
     """
     # === YOUR CODE HERE ===
-    atoms=formula.get_atoms(formula)
+    atoms=formula.get_atoms()
     
     for model in get_all_models(atoms):
         if formula.evaluate(model):
@@ -94,8 +93,9 @@ def check_valid(formula: Formula) -> bool:
           Alternativamente, verifica que sea verdadera en TODOS los modelos.
     """
     # === YOUR CODE HERE ===
-    satisfiable, _ = check_satisfiable(formula.Not(formula)) #ver si su negación es insatisfacible
+    satisfiable, _ = check_satisfiable(Not(formula)) #ver si su negación es insatisfacible
     return not satisfiable    #si lo anterior es False, entonces devuelve True
+
     # === END YOUR CODE ===
 
 
@@ -120,15 +120,19 @@ def check_entailment(kb: list[Formula], query: Formula) -> bool:
           y la query sea falsa.
     """
     # === YOUR CODE HERE ===
-    if len(kb)<2:
-        kbJoin= kb[0] #evitar errores, pues And tiene dos arg
+    if len(kb) == 0: #si no hay elementos en la base de conocimiento, se evalúa que el query sea satifacible
+        kb_formula = query  
+        satisfiable, _ = check_satisfiable(Not(query))
+        return not satisfiable
+    
+    elif len(kb) == 1: #evitar errores con And()
+        kb_formula = kb[0] 
     else:
-        kbJoin=Formula.And(kb) #transformar la lista en formula
-    Notquery=Formula.Not(query) #negar q
-    comb=Formula.And(kbJoin, Notquery) #ver si la conjunción entre las dos es insatisfacible
-    
-    return not check_satisfiable(comb) #si era insatisfacible lo anterior, retorna True
-    
+        kb_formula = And(*kb)         #unir las proposiciones con And() 
+        
+    combined = And(kb_formula, Not(query)) #verificar el valor de verdad de KB ^ ~q
+    satisfiable, _ = check_satisfiable(combined) #ver si lo anterior es insatisfacible
+    return not satisfiable #si era insatisfacible, retorna True
     
     
     # === END YOUR CODE ===
@@ -153,13 +157,13 @@ def truth_table(formula: Formula) -> list[tuple[dict[str, bool], bool]]:
 
     Hint: Combina get_all_models() y evaluate().
     """
-    # === YOUR CODE HERE ===
-    atoms=Formula.get_atoms(formula)
+# === YOUR CODE HERE ===
+    atoms=formula.get_atoms()
     models=get_all_models(atoms)
     result=[]
     
     for i in models:
-        value=Formula.evaluate(formula.model)
+        value=formula.evaluate(i)
         tuplee=(i,value)
         result.append(tuplee)
     return result
