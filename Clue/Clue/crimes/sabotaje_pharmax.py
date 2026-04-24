@@ -42,6 +42,59 @@ def crear_kb() -> KnowledgeBase:
 
     # === YOUR CODE HERE ===
 
+    X = Term("$X")
+    Y = Term("$Y")
+    Z = Term("$Z")
+
+    kb.add_fact(Predicate("documentación_viaje", (dra_santos,)))
+    kb.add_fact(Predicate("registro_conferencia",(director_vega,)))
+    kb.add_fact(Predicate("sin_coartada", (tec_rios,)))
+    kb.add_fact(Predicate("sin_coartada", (asistente_mora,)))
+    
+    kb.add_fact(Predicate("accedió_sala", (tec_rios, sala_cultivos)))
+    kb.add_fact(Predicate("accedió_sala", (asistente_mora, sala_cultivos)))
+    
+    kb.add_fact(Predicate("recibió_pago", (tec_rios, syntek_corp)))
+    kb.add_fact(Predicate("es_empresa_rival", (syntek_corp,)))
+    
+    kb.add_fact(Predicate("acusa", (asistente_mora, tec_rios)))
+    kb.add_fact(Predicate("da_coartada", (tec_rios, asistente_mora)))
+    
+    kb.add_rule(Rule(
+        head=Predicate("coartada_verificada", (X,)),
+        body=(Predicate("dcumentación_vaje", (X,)),)
+    ))
+    
+    kb.add_rule(Rule(
+        head=Predicate("descartado", (X,)),
+        body=(Predicate("registro_conferencia", (X,)),)
+    ))
+    #
+    kb.add_rule(Rule(
+        head=Predicate("descartado", (X,)),
+        body=(Predicate("coartada_verificada", (X)),)
+    ))
+    
+    kb.add_rule(Rule(
+        head=Predicate("conflicto_interes", (X,Y)),
+        body=(Predicate("recibió_pago", (X,Y)),Predicate("es_empresa_rival", (Y)))
+    ))
+
+    kb.add_rule(Rule(
+        head=Predicate("motivo_sabotaje", (X,)),
+        body=(Predicate("conflicto_interes", (X,Z)),)
+    ))
+    
+    kb.add_rule(Rule(
+        head=Predicate("estuvo_crimen",(X,)),
+        body=(Predicate("accedió_sala",(X,sala_cultivos)),)
+    ))
+    
+    kb.add_rule(Rule(
+        head=Predicate("culpable", (X,)),
+        body=(Predicate("motivo_sabotaje",(X,)),Predicate("accedio_sala", (X,sala_cultivos)),
+              Predicate("sin_coartada", (X,)))
+    ))
     # === END YOUR CODE ===
 
     return kb
