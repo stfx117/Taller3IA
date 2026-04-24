@@ -53,7 +53,7 @@ def crear_kb() -> KnowledgeBase:
     #Quien tiene huellas en el arma del crimen tiene evidencia directa en su contra.
     kb.add_rule(Rule(
         head=Predicate("evidencia_directa", (X,)),
-        body=(Predicate("huellas", (X,W), Predicate("arma_crime", (W,))))
+        body=(Predicate("huellas", (X,W)), Predicate("arma_crime", (W,)))
     ))
     
     #Quien estuvo lejos de la escena durante el crimen está descartado como culpable.
@@ -73,7 +73,7 @@ def crear_kb() -> KnowledgeBase:
         body=(Predicate("evidencia_directa", (X,)), Predicate("sin_coartada_verificada", (X,)))
     ))
     
-    # Coartada
+    # Quien da coartada a un culpable lo está encubriendo.
     kb.add_rule(Rule(
         head=Predicate("encubridor", (X,)),
         body=(Predicate("da_coartada", (X, Y)), Predicate("culpable", (Y,)))
