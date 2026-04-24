@@ -11,6 +11,7 @@ from __future__ import annotations
 from src.logic_core import Formula
 
 
+
 def get_all_models(atoms: set[str]) -> list[dict[str, bool]]:
     """
     Genera todos los modelos posibles (asignaciones de verdad).
@@ -31,7 +32,18 @@ def get_all_models(atoms: set[str]) -> list[dict[str, bool]]:
           Cada bit corresponde al valor de verdad de un atomo.
     """
     # === YOUR CODE HERE ===
-    raise NotImplementedError("Implementa get_all_models()")
+    atomsList= sorted(atoms) #organizar atoms en una lista ordenada
+    models=[] #lista de retorno
+    
+    #añadir todos los casos posibles por medio de dict
+    for i in atomsList:
+        dict1={i: True}     #dos valores posibles
+        dict2={i: False}
+        models.append(dict1)        #añadirlos a la lista de modelos
+        models.append(dict2)
+    
+    return models
+    
     # === END YOUR CODE ===
 
 
@@ -54,7 +66,13 @@ def check_satisfiable(formula: Formula) -> tuple[bool, dict[str, bool] | None]:
           la formula en cada uno usando evaluate().
     """
     # === YOUR CODE HERE ===
-    raise NotImplementedError("Implementa check_satisfiable()")
+    atoms=formula.get_atoms(formula)
+    
+    for model in get_all_models(atoms):
+        if formula.evaluate(model):
+            return (True, model)
+    return (False, None)
+       
     # === END YOUR CODE ===
 
 
@@ -76,7 +94,8 @@ def check_valid(formula: Formula) -> bool:
           Alternativamente, verifica que sea verdadera en TODOS los modelos.
     """
     # === YOUR CODE HERE ===
-    raise NotImplementedError("Implementa check_valid()")
+    satisfiable, _ = check_satisfiable(formula.Not(formula)) #ver si su negación es insatisfacible
+    return not satisfiable    #si lo anterior es False, entonces devuelve True
     # === END YOUR CODE ===
 
 
@@ -101,7 +120,17 @@ def check_entailment(kb: list[Formula], query: Formula) -> bool:
           y la query sea falsa.
     """
     # === YOUR CODE HERE ===
-    raise NotImplementedError("Implementa check_entailment()")
+    if len(kb)<2:
+        kbJoin= kb[0] #evitar errores, pues And tiene dos arg
+    else:
+        kbJoin=Formula.And(kb) #transformar la lista en formula
+    Notquery=Formula.Not(query) #negar q
+    comb=Formula.And(kbJoin, Notquery) #ver si la conjunción entre las dos es insatisfacible
+    
+    return not check_satisfiable(comb) #si era insatisfacible lo anterior, retorna True
+    
+    
+    
     # === END YOUR CODE ===
 
 
@@ -125,5 +154,14 @@ def truth_table(formula: Formula) -> list[tuple[dict[str, bool], bool]]:
     Hint: Combina get_all_models() y evaluate().
     """
     # === YOUR CODE HERE ===
-    raise NotImplementedError("Implementa truth_table()")
+    atoms=Formula.get_atoms(formula)
+    models=get_all_models(atoms)
+    result=[]
+    
+    for i in models:
+        value=Formula.evaluate(formula.model)
+        tuplee=(i,value)
+        result.append(tuplee)
+    return result
+    
     # === END YOUR CODE ===
