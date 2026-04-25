@@ -94,7 +94,7 @@ def crear_kb() -> KnowledgeBase:
     
     kb.add_rule(Rule(
         head=Predicate("culpable", (X,)),
-        body=(Predicate("motivo_sabotaje",(X,)),Predicate("estuvo_crimen", (X,)),
+        body=(Predicate("motivo_sabotaje",(X,)),Predicate("acceso_en_momento", (X,)),
               Predicate("sin_coartada", (X,)),)
     ))
     
