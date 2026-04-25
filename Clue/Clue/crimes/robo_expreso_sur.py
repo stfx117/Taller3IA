@@ -60,17 +60,17 @@ def crear_kb() -> KnowledgeBase:
     #La víctima del crimen no tiene razón para mentir; es testigo imparcial.
     kb.add_rule(Rule(
         head=Predicate("testigo_imparcial",(X,)),
-        body=(Predicate("es_victima",(X)),)
+        body=(Predicate("es_victima",(X,)),)
     ))
     #La acusación de un testigo imparcial es creíble.
     kb.add_rule(Rule(
-        head=Predicate("acusación_creible",(X,Y)),
+        head=Predicate("acusacion_creible",(X,Y)),
         body=(Predicate("testigo_imparcial",(X,)), Predicate("acusa", (X,Y)))
     ))
     #Quien estaba en la escena y es acusado de forma creíble es culpable.
     kb.add_rule(Rule(
         head=Predicate("culpable", (X,)),
-        body=(Predicate("en_escena",(X,)), Predicate("acusación_creible", (Y,X)))
+        body=(Predicate("en_escena",(X,)), Predicate("acusacion_creible", (Y,X)))
     ))
     
     #Quien da coartada a un culpable lo está defendiendo.
