@@ -59,7 +59,7 @@ def crear_kb() -> KnowledgeBase:
     #Quien estuvo lejos de la escena durante el crimen está descartado como culpable.
     kb.add_rule(Rule(
         head=Predicate("descartado", (X,)),
-        body=(Predicate("lejos_escena", (X,)),)
+        body=[Predicate("lejos_escena", (X,))]
     ))
     
     #El testimonio de alguien descartado como culpable es confiable

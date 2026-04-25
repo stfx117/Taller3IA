@@ -5,7 +5,7 @@ El pipeline completo to_cnf() llama a todas las transformaciones en orden.
 
 from __future__ import annotations
 
-from src.logic_core import And, Atom, Formula, Not, Or, Implies, Iff
+from logic_core import And, Atom, Formula, Not, Or, Implies, Iff
 
 
 # --- FUNCION GUÍA SUMINISTRADA COMPLETA ---

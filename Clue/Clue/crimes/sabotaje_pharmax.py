@@ -64,7 +64,7 @@ def crear_kb() -> KnowledgeBase:
     
     kb.add_rule(Rule(
         head=Predicate("coartada_verificada", (X,)),
-        body=(Predicate("documentación_viaje", (X,)),)
+        body=[Predicate("documentación_viaje", (X,))]
     ))
     
     kb.add_rule(Rule(
@@ -94,8 +94,8 @@ def crear_kb() -> KnowledgeBase:
     
     kb.add_rule(Rule(
         head=Predicate("culpable", (X,)),
-        body=(Predicate("motivo_sabotaje",(X,)),Predicate("acceso_en_momento", (X,)),
-              Predicate("sin_coartada", (X,)))
+        body=(Predicate("motivo_sabotaje",(X,)),Predicate("estuvo_crimen", (X,)),
+              Predicate("sin_coartada", (X,)),)
     ))
     
     kb.add_rule(Rule(
