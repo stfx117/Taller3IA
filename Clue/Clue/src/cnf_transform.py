@@ -5,7 +5,7 @@ El pipeline completo to_cnf() llama a todas las transformaciones en orden.
 
 from __future__ import annotations
 
-from src.logic_core import And, Atom, Formula, Not, Or
+from src.logic_core import And, Atom, Formula, Not, Or, Implies, Iff
 
 
 # --- FUNCION GUÍA SUMINISTRADA COMPLETA ---
@@ -43,129 +43,136 @@ def eliminate_double_negation(formula: Formula) -> Formula:
 
 
 def eliminate_iff(formula: Formula) -> Formula:
-    """
-    Elimina bicondicionales recursivamente.
-
-    Transformacion:
-        Iff(a, b) -> And(Implies(a, b), Implies(b, a))
-
-    Debe aplicarse recursivamente a todas las sub-formulas.
-
-    Ejemplo:
-        >>> eliminate_iff(Iff(Atom('p'), Atom('q')))
-        And(Implies(Atom('p'), Atom('q')), Implies(Atom('q'), Atom('p')))
-
-    Hint: Usa pattern matching sobre el tipo de la formula.
-          Para cada tipo, aplica eliminate_iff recursivamente a los operandos,
-          y solo transforma cuando encuentras un Iff.
-    """
-    # === YOUR CODE HERE ===
-    raise NotImplementedError("Implementa eliminate_iff()")
-    # === END YOUR CODE ===
+    if isinstance(formula, Atom):
+        return formula
+    if isinstance(formula, Not):
+        return Not(eliminate_iff(formula.operand))
+    if isinstance(formula, And):
+        return And(*(eliminate_iff(c) for c in formula.conjuncts))
+    if isinstance(formula, Or):
+        return Or(*(eliminate_iff(d) for d in formula.disjuncts))
+    if isinstance(formula, Implies):
+        return Implies(
+            eliminate_iff(formula.antecedent),
+            eliminate_iff(formula.consequent),
+        )
+    if isinstance(formula, Iff):
+        left = eliminate_iff(formula.left)
+        right = eliminate_iff(formula.right)
+        return And(Implies(left, right), Implies(right, left))
+    return formula
 
 
 def eliminate_implication(formula: Formula) -> Formula:
-    """
-    Elimina implicaciones recursivamente.
-
-    Transformacion:
-        Implies(a, b) -> Or(Not(a), b)
-
-    Debe aplicarse recursivamente a todas las sub-formulas.
-
-    Ejemplo:
-        >>> eliminate_implication(Implies(Atom('p'), Atom('q')))
-        Or(Not(Atom('p')), Atom('q'))
-
-    Hint: Similar a eliminate_iff. Recorre recursivamente y transforma
-          solo los nodos Implies.
-    """
-    # === YOUR CODE HERE ===
-    raise NotImplementedError("Implementa eliminate_implication()")
-    # === END YOUR CODE ===
+    if isinstance(formula, Atom):
+        return formula
+    if isinstance(formula, Not):
+        return Not(eliminate_implication(formula.operand))
+    if isinstance(formula, And):
+        return And(*(eliminate_implication(c) for c in formula.conjuncts))
+    if isinstance(formula, Or):
+        return Or(*(eliminate_implication(d) for d in formula.disjuncts))
+    if isinstance(formula, Implies):
+        antecedent = eliminate_implication(formula.antecedent)
+        consequent = eliminate_implication(formula.consequent)
+        return Or(Not(antecedent), consequent)
+    if isinstance(formula, Iff):
+        return Iff(
+            eliminate_implication(formula.left),
+            eliminate_implication(formula.right),
+        )
+    return formula
 
 
 def push_negation_inward(formula: Formula) -> Formula:
-    """
-    Aplica las leyes de De Morgan y mueve negaciones hacia los atomos.
-
-    Transformaciones:
-        Not(And(a, b, ...)) -> Or(Not(a), Not(b), ...)   (De Morgan)
-        Not(Or(a, b, ...))  -> And(Not(a), Not(b), ...)   (De Morgan)
-
-    Debe aplicarse recursivamente a todas las sub-formulas.
-
-    Ejemplo:
-        >>> push_negation_inward(Not(And(Atom('p'), Atom('q'))))
-        Or(Not(Atom('p')), Not(Atom('q')))
-        >>> push_negation_inward(Not(Or(Atom('p'), Atom('q'))))
-        And(Not(Atom('p')), Not(Atom('q')))
-
-    Hint: Cuando encuentres un Not, revisa que hay adentro:
-          - Si es Not(And(...)): aplica De Morgan para convertir en Or de negaciones.
-          - Si es Not(Or(...)): aplica De Morgan para convertir en And de negaciones.
-          - Si es Not(Atom): dejar como esta.
-          Para And y Or sin negacion encima, simplemente recursa sobre los hijos.
-
-    Nota: Esta funcion se llama DESPUES de eliminar Iff e Implies,
-          asi que no necesitas manejar esos tipos.
-    """
-    # === YOUR CODE HERE ===
-    raise NotImplementedError("Implementa push_negation_inward()")
-    # === END YOUR CODE ===
+    if isinstance(formula, Atom):
+        return formula
+    if isinstance(formula, Not):
+        operand = formula.operand
+        if isinstance(operand, Atom):
+            return formula
+        if isinstance(operand, Not):
+            return push_negation_inward(operand.operand)
+        if isinstance(operand, And):
+            return Or(*(push_negation_inward(Not(c)) for c in operand.conjuncts))
+        if isinstance(operand, Or):
+            return And(*(push_negation_inward(Not(d)) for d in operand.disjuncts))
+        return Not(push_negation_inward(operand))
+    if isinstance(formula, And):
+        return And(*(push_negation_inward(c) for c in formula.conjuncts))
+    if isinstance(formula, Or):
+        return Or(*(push_negation_inward(d) for d in formula.disjuncts))
+    return formula
 
 
 def distribute_or_over_and(formula: Formula) -> Formula:
-    """
-    Distribuye Or sobre And para obtener CNF.
+    if isinstance(formula, (Atom, Not)):
+        return formula
+    if isinstance(formula, And):
+        return And(*(distribute_or_over_and(c) for c in formula.conjuncts))
+    if isinstance(formula, Or):
+        distributed_children = [distribute_or_over_and(d) for d in formula.disjuncts]
 
-    Transformacion:
-        Or(A, And(B, C)) -> And(Or(A, B), Or(A, C))
+        and_child = None
+        for child in distributed_children:
+            if isinstance(child, And):
+                and_child = child
+                break
 
-    Debe aplicarse recursivamente hasta que no queden Or que contengan And.
+        if and_child is None:
+            return Or(*distributed_children)
 
-    Ejemplo:
-        >>> distribute_or_over_and(Or(Atom('p'), And(Atom('q'), Atom('r'))))
-        And(Or(Atom('p'), Atom('q')), Or(Atom('p'), Atom('r')))
+        others = [child for child in distributed_children if child is not and_child]
 
-    Hint: Para un nodo Or, primero distribuye recursivamente en los hijos.
-          Luego busca si algun hijo es un And. Si lo encuentras, aplica la
-          distribucion y recursa sobre el resultado (podria haber mas).
-          Para And, simplemente recursa sobre cada conjuncion.
-          Atomos y Not se retornan sin cambio.
+        new_conjuncts = []
+        for conjunct in and_child.conjuncts:
+            new_disjuncts = others + [conjunct]
+            if len(new_disjuncts) == 1:
+                new_formula = new_disjuncts[0]
+            else:
+                new_formula = Or(*new_disjuncts)
+            new_conjuncts.append(distribute_or_over_and(new_formula))
 
-    Nota: Esta funcion se llama DESPUES de mover negaciones hacia adentro,
-          asi que solo veras Atom, Not(Atom), And y Or.
-    """
-    # === YOUR CODE HERE ===
-    raise NotImplementedError("Implementa distribute_or_over_and()")
-    # === END YOUR CODE ===
+        if len(new_conjuncts) == 1:
+            return new_conjuncts[0]
+        return And(*new_conjuncts)
+
+    return formula
 
 
 def flatten(formula: Formula) -> Formula:
-    """
-    Aplana conjunciones y disyunciones anidadas.
+    if isinstance(formula, Atom):
+        return formula
+    if isinstance(formula, Not):
+        return Not(flatten(formula.operand))
+    if isinstance(formula, And):
+        flat_conjuncts = []
+        for conjunct in formula.conjuncts:
+            flattened = flatten(conjunct)
+            if isinstance(flattened, And):
+                flat_conjuncts.extend(flattened.conjuncts)
+            else:
+                flat_conjuncts.append(flattened)
 
-    Transformaciones:
-        And(And(a, b), c) -> And(a, b, c)
-        Or(Or(a, b), c)   -> Or(a, b, c)
+        if len(flat_conjuncts) == 1:
+            return flat_conjuncts[0]
+        return And(*flat_conjuncts)
 
-    Debe aplicarse recursivamente.
+    if isinstance(formula, Or):
+        flat_disjuncts = []
+        for disjunct in formula.disjuncts:
+            flattened = flatten(disjunct)
+            if isinstance(flattened, Or):
+                flat_disjuncts.extend(flattened.disjuncts)
+            else:
+                flat_disjuncts.append(flattened)
 
-    Ejemplo:
-        >>> flatten(And(And(Atom('a'), Atom('b')), Atom('c')))
-        And(Atom('a'), Atom('b'), Atom('c'))
-        >>> flatten(Or(Or(Atom('a'), Atom('b')), Atom('c')))
-        Or(Atom('a'), Atom('b'), Atom('c'))
+        if len(flat_disjuncts) == 1:
+            return flat_disjuncts[0]
+        return Or(*flat_disjuncts)
 
-    Hint: Para un And, recorre cada hijo. Si un hijo tambien es And,
-          agrega sus conjuncts directamente en vez de agregar el And.
-          Igual para Or con sus disjuncts.
-          Si al final solo queda 1 elemento, retornalo directamente.
-    """
-    # === YOUR CODE HERE ===
-    raise NotImplementedError("Implementa flatten()")
-    # === END YOUR CODE ===
+    return formula
+
 
 
 # --- PIPELINE COMPLETO ---
