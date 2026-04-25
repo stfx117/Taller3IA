@@ -59,6 +59,8 @@ def crear_kb() -> KnowledgeBase:
     kb.add_fact(Predicate("sin_coartada", (oficial_duarte,)))
     kb.add_fact(Predicate("sin_coartada", (marinero_pinto,)))    
     
+    kb.add_fact(Predicate("reportado_informante", (oficial_duarte,)))
+    kb.add_fact(Predicate("reportado_informante", (marinero_pinto,)))
     #reglas
     
     kb.add_rule(Rule(
@@ -107,7 +109,7 @@ def crear_kb() -> KnowledgeBase:
     ))
     kb.add_rule(Rule(
         head=Predicate("red_activa", (Z,)),
-        body=(Predicate("pertenece_a", (X, Z)), Predicate("culpable", (X,)))
+        body=(Predicate("pertenece_a", (X, Z)), Predicate("culpable", (X,)),)
     ))
     # === END YOUR CODE ===
 
