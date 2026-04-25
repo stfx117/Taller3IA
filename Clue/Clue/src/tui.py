@@ -33,6 +33,7 @@ from src.predicate_logic import KnowledgeBase, Predicate, Term
 # ─── Casos disponibles ────────────────────────────────────────────────────────
 
 _CASE_MODULES = [
+    "crimes.el_enigma_del_reloj",
     "crimes.veneno_villa_espinas",
     "crimes.robo_expreso_sur",
     "crimes.sabotaje_pharmax",
